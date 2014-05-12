@@ -1,0 +1,15 @@
+name: NPCDialogues
+version: 1.0
+author: mrCookieSlime
+website: http://dev.bukkit.org/profiles/mrCookieSlime/bukkit-plugins/
+
+main: me.mrCookieSlime.NPCDialogues.main
+
+commands:
+  npc:
+    description: Creates/Modifies NPCs
+    usage: /npc
+permissions:
+  npc.modify:
+    description: Allows to create/modify NPCs
+    default: op
