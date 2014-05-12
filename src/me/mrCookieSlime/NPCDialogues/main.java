@@ -40,12 +40,31 @@ public class main extends JavaPlugin {
 		
 		getCommand("npc").setExecutor(this);
 		
+		final FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+		
+		for (int i = 0; i < 101; i++) {
+			if (!cfg.contains(String.valueOf(i))) {
+				break;
+			}
+			else {
+				LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
+				n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
+				n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
+				
+				if (cfg.contains(i + ".name")) {
+					n.setCustomNameVisible(true);
+					n.setCustomName(cfg.getString(i + ".name"));
+				}
+				
+				npcs.add(n);
+			}
+		}
+		
 		Bukkit.getScheduler().runTaskTimer(this, new BukkitRunnable() {
 			
 			@Override
 			public void run() {
 				for (int i = 0; i < npcs.size(); i++) {
-					FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 					npcs.get(i).teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
 				}
 			}
@@ -55,6 +74,10 @@ public class main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		System.out.println("NPCDialogues v" + getDescription().getVersion() + " disabled!");
+		
+		for (LivingEntity n: npcs) {
+			n.remove();
+		}
 	}
 	
 	@Override
