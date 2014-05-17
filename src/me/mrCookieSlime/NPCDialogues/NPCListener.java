@@ -39,7 +39,7 @@ public class NPCListener implements Listener {
 		for (int i = 0; i < main.npcs.size(); i++) {
 			if (main.npcs.get(i).getLocation().getChunk() == c) {
 				main.npcs.get(i).remove();
-				main.npcs.remove(i);
+				main.npcs.set(i, null);
 			}
 		}
 	}

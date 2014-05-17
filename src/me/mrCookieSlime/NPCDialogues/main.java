@@ -46,7 +46,7 @@ public class main extends JavaPlugin {
 			if (!cfg.contains(String.valueOf(i))) {
 				break;
 			}
-			else {
+			else if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
 				LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
 				n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
 				n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
@@ -58,6 +58,9 @@ public class main extends JavaPlugin {
 				
 				npcs.add(n);
 			}
+			else {
+				npcs.add(null);
+			}
 		}
 		
 		Bukkit.getScheduler().runTaskTimer(this, new BukkitRunnable() {
@@ -65,33 +68,12 @@ public class main extends JavaPlugin {
 			@Override
 			public void run() {
 				
-				for (int i = 0; i < npcs.size(); i++) {
-					npcs.get(i).remove();
-					npcs.remove(i);
-				}
-				
 				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 				
-				for (int i = 0; i < 101; i++) {
-					if (!cfg.contains(String.valueOf(i))) {
-						break;
-					}
-					else {
-						if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
-							LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
-							n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
-							n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
-							
-							if (cfg.contains(i + ".name")) {
-								n.setCustomNameVisible(true);
-								n.setCustomName(cfg.getString(i + ".name"));
-							}
-							
-							npcs.add(n);
-						}
-						else {
-							npcs.add(null);
-						}
+				for (int i = 0; i < npcs.size(); i++) {
+					LivingEntity n = npcs.get(i);
+					if (n != null) {
+						n.teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
 					}
 				}
 			}
@@ -102,8 +84,10 @@ public class main extends JavaPlugin {
 	public void onDisable() {
 		System.out.println("NPCDialogues v" + getDescription().getVersion() + " disabled!");
 		
-		for (LivingEntity n: npcs) {
-			n.remove();
+		for (int i = 0; i < npcs.size(); i++) {
+			if (npcs.get(i) != null) {
+				npcs.get(i).remove();
+			}
 		}
 	}
 	
