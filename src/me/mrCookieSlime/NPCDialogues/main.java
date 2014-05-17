@@ -89,6 +89,9 @@ public class main extends JavaPlugin {
 							
 							npcs.add(n);
 						}
+						else {
+							npcs.add(null);
+						}
 					}
 				}
 			}
