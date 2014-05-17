@@ -40,7 +40,7 @@ public class main extends JavaPlugin {
 		
 		getCommand("npc").setExecutor(this);
 		
-		final FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+		FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 		
 		for (int i = 0; i < 101; i++) {
 			if (!cfg.contains(String.valueOf(i))) {
@@ -64,8 +64,32 @@ public class main extends JavaPlugin {
 			
 			@Override
 			public void run() {
+				
 				for (int i = 0; i < npcs.size(); i++) {
-					npcs.get(i).teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
+					npcs.get(i).remove();
+					npcs.remove(i);
+				}
+				
+				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+				
+				for (int i = 0; i < 101; i++) {
+					if (!cfg.contains(String.valueOf(i))) {
+						break;
+					}
+					else {
+						if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
+							LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
+							n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
+							n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
+							
+							if (cfg.contains(i + ".name")) {
+								n.setCustomNameVisible(true);
+								n.setCustomName(cfg.getString(i + ".name"));
+							}
+							
+							npcs.add(n);
+						}
+					}
 				}
 			}
 		}, 0L, 200L);

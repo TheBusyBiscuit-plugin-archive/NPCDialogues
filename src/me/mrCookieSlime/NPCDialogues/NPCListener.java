@@ -1,6 +1,7 @@
 package me.mrCookieSlime.NPCDialogues;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -9,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 
 public class NPCListener implements Listener {
 	
@@ -27,6 +29,17 @@ public class NPCListener implements Listener {
 		if (e instanceof EntityDamageByEntityEvent) {
 			if (main.npcs.contains(((EntityDamageByEntityEvent) e).getDamager())) {
 				e.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onUnload(ChunkUnloadEvent e) {
+		Chunk c = e.getChunk();
+		for (int i = 0; i < main.npcs.size(); i++) {
+			if (main.npcs.get(i).getLocation().getChunk() == c) {
+				main.npcs.get(i).remove();
+				main.npcs.remove(i);
 			}
 		}
 	}
