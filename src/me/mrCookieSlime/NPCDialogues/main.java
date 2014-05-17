@@ -71,9 +71,20 @@ public class main extends JavaPlugin {
 				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 				
 				for (int i = 0; i < npcs.size(); i++) {
-					LivingEntity n = npcs.get(i);
-					if (n != null) {
-						n.teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
+					if (npcs.get(i) != null) {
+						npcs.get(i).teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
+					}
+					else if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
+						LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
+						n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
+						n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
+						
+						if (cfg.contains(i + ".name")) {
+							n.setCustomNameVisible(true);
+							n.setCustomName(cfg.getString(i + ".name"));
+						}
+						
+						npcs.set(i, n);
 					}
 				}
 			}

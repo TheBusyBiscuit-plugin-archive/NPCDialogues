@@ -1,7 +1,9 @@
 package me.mrCookieSlime.NPCDialogues;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -37,9 +39,12 @@ public class NPCListener implements Listener {
 	public void onUnload(ChunkUnloadEvent e) {
 		Chunk c = e.getChunk();
 		for (int i = 0; i < main.npcs.size(); i++) {
-			if (main.npcs.get(i).getLocation().getChunk() == c) {
-				main.npcs.get(i).remove();
-				main.npcs.set(i, null);
+			if (main.npcs.get(i) != null) {
+				FileConfiguration cfg = YamlConfiguration.loadConfiguration(main.file);
+				if (new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk() == c) {
+					main.npcs.get(i).remove();
+					main.npcs.set(i, null);
+				}
 			}
 		}
 	}
