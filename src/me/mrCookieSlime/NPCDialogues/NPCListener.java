@@ -6,12 +6,14 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
 public class NPCListener implements Listener {
@@ -38,12 +40,21 @@ public class NPCListener implements Listener {
 	@EventHandler
 	public void onUnload(ChunkUnloadEvent e) {
 		Chunk c = e.getChunk();
+		for (Entity n: c.getEntities())  {
+			if (main.npcs.contains(n)) {
+				NPC.despawn(main.npcs.indexOf(n));
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onLoad(ChunkLoadEvent e) {
+		Chunk c = e.getChunk();
 		for (int i = 0; i < main.npcs.size(); i++) {
-			if (main.npcs.get(i) != null) {
+			if (main.npcs.get(i) == null) {
 				FileConfiguration cfg = YamlConfiguration.loadConfiguration(main.file);
-				if (new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk() == c) {
-					main.npcs.get(i).remove();
-					main.npcs.set(i, null);
+				if (c == new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk()) {
+					NPC.spawn(i);
 				}
 			}
 		}

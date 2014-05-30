@@ -16,8 +16,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class main extends JavaPlugin {
@@ -37,6 +35,10 @@ public class main extends JavaPlugin {
 		supported.add(EntityType.VILLAGER);
 		supported.add(EntityType.ZOMBIE);
 		supported.add(EntityType.SKELETON);
+		supported.add(EntityType.IRON_GOLEM);
+		supported.add(EntityType.WITCH);
+		supported.add(EntityType.BLAZE);
+		supported.add(EntityType.PIG_ZOMBIE);
 		
 		getCommand("npc").setExecutor(this);
 		
@@ -47,16 +49,7 @@ public class main extends JavaPlugin {
 				break;
 			}
 			else if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
-				LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
-				n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
-				n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
-				
-				if (cfg.contains(i + ".name")) {
-					n.setCustomNameVisible(true);
-					n.setCustomName(cfg.getString(i + ".name"));
-				}
-				
-				npcs.add(n);
+				NPC.spawn(i);
 			}
 			else {
 				npcs.add(null);
@@ -67,28 +60,13 @@ public class main extends JavaPlugin {
 			
 			@Override
 			public void run() {
-				
-				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-				
 				for (int i = 0; i < npcs.size(); i++) {
 					if (npcs.get(i) != null) {
-						npcs.get(i).teleport(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")));
-					}
-					else if (Bukkit.getWorld(cfg.getString(i + ".WORLD")).isChunkLoaded(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")).getChunk())) {
-						LivingEntity n = (LivingEntity) Bukkit.getWorld(cfg.getString(i + ".WORLD")).spawnEntity(new Location(Bukkit.getWorld(cfg.getString(i + ".WORLD")), cfg.getDouble(i + ".X"), cfg.getDouble(i + ".Y"), cfg.getDouble(i + ".Z")), EntityType.valueOf(cfg.getString(i + ".type")));
-						n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
-						n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
-						
-						if (cfg.contains(i + ".name")) {
-							n.setCustomNameVisible(true);
-							n.setCustomName(cfg.getString(i + ".name"));
-						}
-						
-						npcs.set(i, n);
+						NPC.refresh(i);
 					}
 				}
 			}
-		}, 0L, 200L);
+		}, 0L, 400L);
 	}
 	
 	@Override
@@ -97,7 +75,7 @@ public class main extends JavaPlugin {
 		
 		for (int i = 0; i < npcs.size(); i++) {
 			if (npcs.get(i) != null) {
-				npcs.get(i).remove();
+				NPC.despawn(i);
 			}
 		}
 	}
@@ -113,6 +91,8 @@ public class main extends JavaPlugin {
 						if (supported.contains(EntityType.valueOf(args[1].toUpperCase()))) {
 							FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 							
+							int id = -111;
+							
 							for (int i = 0; i < 101; i++) {
 								if (!cfg.contains(String.valueOf(i))) {
 									cfg.set(i + ".type", args[1].toUpperCase());
@@ -121,6 +101,7 @@ public class main extends JavaPlugin {
 									cfg.set(i + ".Z", p.getLocation().getZ());
 									cfg.set(i + ".WORLD", p.getLocation().getWorld().getName());
 									p.sendMessage(ChatColor.GREEN + "NPC " + ChatColor.DARK_GREEN + "(ID: " + i + ") " + ChatColor.GREEN + "created");
+									id = i;
 									break;
 								}
 							}
@@ -130,10 +111,7 @@ public class main extends JavaPlugin {
 							} catch (IOException e) {
 							}
 							
-							LivingEntity n = (LivingEntity) p.getWorld().spawnEntity(p.getLocation(), EntityType.valueOf(args[1].toUpperCase()));
-							n.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999));
-							n.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, -999999999));
-							npcs.add(n);
+							NPC.spawn(id);
 						}
 						else {
 							p.sendMessage(prefix + ChatColor.DARK_RED + args[1].toUpperCase() + ChatColor.RED + " is not supported. Do /npc list types");
